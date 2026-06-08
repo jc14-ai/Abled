@@ -1,20 +1,19 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { BeneficiaryRecord, getBeneficiary, getTotalDisbursed, isAdmin, abledContractConfigured, buildDisburseXDR, buildVerifyBeneficiaryXDR } from '@/lib/abled-contract';
+import { BeneficiaryRecord, getBeneficiary, getTotalDisbursed, abledContractConfigured, buildDisburseXDR, buildVerifyBeneficiaryXDR } from '@/lib/abled-contract';
 import { BeneficiaryRow } from './BeneficiaryRow';
 import { ABLED_CONTRACT_ID, fundTestnetAccount } from '@/lib/stellar';
 import { signAndSubmit } from '@/lib/sign';
 import { StatusBadge } from './StatusBadge';
 
-const DEMO_ADMIN_ACCESS = process.env.NEXT_PUBLIC_DEMO_ADMIN === 'true';
+
 
 interface AdminPortalProps {
   address: string;
 }
 
 export function AdminPortal({ address }: AdminPortalProps) {
-  const [isUserAdmin, setIsUserAdmin] = useState<boolean | null>(null);
   const [totalDisbursed, setTotalDisbursed] = useState<bigint>(0n);
   const [searchAddress, setSearchAddress] = useState('');
   const [activeBeneficiary, setActiveBeneficiary] = useState<{address: string, record: BeneficiaryRecord} | null>(null);
@@ -51,18 +50,7 @@ export function AdminPortal({ address }: AdminPortalProps) {
   }, [registry]);
 
   const checkAdmin = async () => {
-    if (!abledContractConfigured()) return;
-    if (DEMO_ADMIN_ACCESS) {
-      setIsUserAdmin(true);
-      return;
-    }
-    try {
-      const isAdminUser = await isAdmin(address);
-      setIsUserAdmin(isAdminUser);
-    } catch (e) {
-      console.warn('isAdmin check failed', e);
-      setIsUserAdmin(false);
-    }
+    // Admin is always available in this demo version
   };
 
   const fetchStats = async () => {
@@ -183,28 +171,11 @@ export function AdminPortal({ address }: AdminPortalProps) {
     );
   }
 
-  if (isUserAdmin === false && !DEMO_ADMIN_ACCESS) {
-    return (
-      <div className="max-w-4xl mx-auto py-12 px-4 text-center">
-        <div className="glass p-12 rounded-3xl">
-          <div className="w-20 h-20 bg-rose-500/20 text-rose-500 rounded-full flex items-center justify-center mx-auto mb-6">
-            <svg className="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-            </svg>
-          </div>
-          <h2 className="text-3xl font-bold mb-4">Unauthorized</h2>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="max-w-6xl mx-auto py-8 px-4 space-y-8 animate-fade-in">
-      {DEMO_ADMIN_ACCESS && (
-        <div className="rounded-3xl border border-yellow-400/20 bg-yellow-500/10 p-4 text-yellow-100">
-          <strong className="font-bold">Demo Admin Mode:</strong> Admin access is always enabled for demo purposes. Transactions may still require the configured admin wallet to sign successfully.
-        </div>
-      )}
+      <div className="rounded-3xl border border-blue-400/20 bg-blue-500/10 p-4 text-blue-100">
+        <strong className="font-bold">Demo Mode:</strong> Admin portal is fully accessible for demonstration. Transactions may still require wallet signing.
+      </div>
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
           <h2 className="text-4xl font-bold tracking-tight">Distribution Hub</h2>
